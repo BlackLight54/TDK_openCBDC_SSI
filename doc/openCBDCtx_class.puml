@@ -1,0 +1,30 @@
+@startuml Transaction datastructure
+
+class outpoint {
+transaction_id: byte[32] 
+index: uint 
+}
+class output{
+     public_key: byte[32] 
+     value: uint 
+     }
+class input{
+     outpoint: outpoint 
+     output: output 
+     }
+class witness {
+     signature: byte[64] 
+     }
+class transaction {
+     +inputs: input []
+     +outputs: output[]
+     +witnesses: witness[]
+     }
+
+input "1" o-- output 
+input "1" o-- outpoint 
+transaction "k" o-- input
+
+transaction "k" o-- witness
+transaction "l" o-- output
+@enduml

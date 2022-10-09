@@ -1,0 +1,51 @@
+@startuml Onboarding openCBDC w/SSI sequence diagram
+actor Alice as A 
+participant "Central Bank" as CB 
+database "SSI ledger" as SSI
+
+A -> CB : Open account request
+activate CB
+CB ->  A : check KYC
+activate A
+A -> CB : present KYC
+deactivate A
+
+opt KYC check passed
+CB -> A : Cred offer
+note right
+? Crediential may contain a key derived from the master secret?
+end note 
+deactivate CB
+activate A
+opt !has Master secret 
+    A-> A : Create mater secret
+    note right 
+        ? Each person may have one master 
+        secret associated with them,
+        which is associated with both 
+        the KYC VCs and the "Account" VC
+    end note 
+end
+A -> SSI : Get cred def
+activate SSI
+SSI -> A : Cred def
+deactivate SSI
+A -> A : create cred reqest
+ A -> CB : cred request
+ activate CB 
+CB -> CB : Create crediential
+CB -> SSI : publish crediential to revocation registry
+activate SSI
+SSI -> CB 
+deactivate SSI
+CB -> A : issued crediential 
+deactivate CB
+A -> SSI : Get crediantial revocation registry definition 
+activate SSI 
+SSI -> A : Rvocation registry definition
+deactivate SSI
+A -> A : Store crediential in wallet
+deactivate A
+end 
+
+@enduml

@@ -1,0 +1,101 @@
+@startuml Entities
+title Majority Transaction processing workflow 
+
+skinparam MaxMessageSize 100
+
+database "SSI ledger" as SSI
+actor "Alice" as A
+actor "Bob" as B
+'entity "Central Bank" as CB
+'entity "Government" as G
+entity "Sentinel Guard" as SG
+entity "Sentinel" as S
+entity "openCBDC TxP" as TxP
+
+rnote over all
+    Which keys/identifiers do we use for what?
+    DID, DIDDoc -> identify the clients among eachother
+    CB issued VC -> identify the clients to the CB
+    Tau underlying key -> Prove cash-like encumberances
+    ? What are individual addresses 
+end note 
+hnote over SG, S
+    Controlled by the CB, secure
+end note 
+hnote over A
+    Alice already onboarded with the CB 
+    and received her VP
+end note 
+
+A -> B ++: Get did 
+return did 
+
+A -> SSI ++: resolve did 
+return DIDDoc
+note left
+    DIDDoc contains the public key 
+    to use as encumberance for TxOs
+end note 
+
+A -> A: Create valid TX
+note left :see Tx class uml
+
+autoactivate on 
+note left
+KYC check
+--OR--
+DigiCash-like 
+No smurfing
+Speed of money check
+end note 
+alt KYC check
+A -> SG: signed TX
+SG -> SSI : SSI validation 
+return SSI validation result
+else DigiCash-like privacy
+deactivate SG
+A -> SG :{from_address, amount}
+note left
+ A blind signature-rel aláírattat a 
+ FED-del egy (forráscím,összeg) cetlit
+end note 
+SG -> A : Request VC
+return VC, proof
+note right: store {{from_address, amount},timestamp} associated with this VC
+return signed {from_address, amount}
+B -> SG :{to_address, amount}
+SG -> B : Request VC
+return VC, proof
+return signed {to_address, amount}
+autoactivate off
+A ->  B  ++: signed {from_address, amount }, signed TX
+B -> SG --++ : signed {from_address, amount}, signed {to_address, amount}, signed TX
+
+autoactivate on
+end 
+opt tx valid 
+    SG -> S : send in tx to payment processor
+    S -> S : Transaction local validation 
+    deactivate S
+    note left 
+    Which keys do we
+    use as encumberance?
+    ---
+    The ones in the DIDDoc
+    end note 
+    S -> TxP : process Tx
+    return Tx processed
+    return Tx result
+end 
+opt tx success 
+alt KYC check
+autoactivate off
+SG -> B:  transaction result
+else DigiCash-like
+SG -> B: Transaction result, sig{{from_address,amount},timestamp}, sig{{to_address, amount},timestamp}
+B -> A : sig{{from_address, amount}, timestamp}
+A -> SG : req hash update(proof,hash)
+B -> SG : req hash update(proof,hash)
+end
+end
+@enduml

@@ -1,0 +1,16 @@
+@startuml Use-cases
+left to right direction 
+'top to bottom direction
+actor Citizen as A
+actor "Central Bank" as CB
+usecase "Prove Citizenship with VC" as UC1
+usecase "Create openCBDC wallet" as UC2
+usecase "Transfer CBDC through secure channel to third party" as UC3
+usecase "Recieve monetar aid from third party based on verified crediential" as UC4
+usecase "Can issue monetary aid based on verified crediential" as CBUC1
+A -> UC1
+A -> UC2
+A -> UC3
+A -> UC4
+CB -> CBUC1
+@enduml
