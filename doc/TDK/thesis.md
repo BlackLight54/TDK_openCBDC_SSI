@@ -1,8 +1,8 @@
 # Payments in openCBDC with Self-Sovereign Identitites – from the verifiable to the private
 
-# Absztrakt
-## Abstract
-## Kivonat
+# Abstract
+## English Abstract
+## Magyar Kivonat
 
 # Introduction, Motivation, and some Context (3-4 pgs)
 
@@ -36,5 +36,6 @@
 # Results (5-15 pgs)
 
 # Conclusion, and Further Work (1-2 pgs)
+[comment] # (Should be in synergy with the Introduciton. Did I achieve my goals? What are the limitations? What are the next steps? )
 ## Bibliography
 ## Appendicies
