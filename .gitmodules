@@ -1,0 +1,3 @@
+[submodule "opencbdc-tx"]
+	path = opencbdc-tx
+	url = https://github.com/kozosjavak/bsc_thesis_opencbdc-tx.git
