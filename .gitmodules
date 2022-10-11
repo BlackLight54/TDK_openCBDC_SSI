@@ -1,0 +1,3 @@
+[submodule "opencbdc-tx"]
+	path = opencbdc-tx
+	url = https://github.com/BlackLight54/proj-lab_opencbdc-tx.git
