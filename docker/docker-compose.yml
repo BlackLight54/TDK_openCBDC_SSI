@@ -1,0 +1,72 @@
+#from https://github.com/hyperledger/aries-cloudagent-python/issues/1514
+version: "3"
+services:
+  agent-alice:
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5-rc0
+    container_name: agent-alice
+    environment:
+      ACAPY_ADMIN_INSECURE_MODE: "true"
+      ACAPY_AUTO_PROVISION: "true"
+      ACAPY_DEBUG_CONNECTIONS: "true"
+      ACAPY_ENDPOINT: "http://agent-alice:${ALICE_AGENT_PORT}"
+      ACAPY_LABEL: "Agent Alice"
+      ACAPY_LOG_LEVEL: "info"
+      # ACAPY_NO_LEDGER: "true"
+      LEDGER_URL: http://dev.greenlight.bcovrin.vonx.io
+      ADMIN_PORT: "${ALICE_AGENT_ADMIN_PORT}"
+      AGENT_PORT: "${ALICE_AGENT_PORT}"
+    entrypoint: /bin/bash
+    command: ["-c",
+        "aca-py start \
+        --admin '0.0.0.0' ${ALICE_AGENT_ADMIN_PORT} \
+        --inbound-transport http '0.0.0.0' ${ALICE_AGENT_PORT} \
+        --outbound-transport http  \
+        --genesis-url ${LEDGER_URL}/genesis \
+        --seed Alice000000000000000000000000111 \        
+        --auto-provision \
+        --auto-accept-invites \
+        --auto-accept-requests \ 
+        --auto-ping-connection \
+        --wallet-type indy \
+        --wallet-name Alice1 \
+        --wallet-key secret \ 
+        "
+    ]
+    ports:
+      - "${ALICE_AGENT_ADMIN_PORT}:${ALICE_AGENT_ADMIN_PORT}"
+    restart: always
+
+  agent-bob:
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5-rc0
+    container_name: agent-bob
+    environment:
+      ACAPY_ADMIN_INSECURE_MODE: "true"
+      ACAPY_AUTO_PROVISION: "true"
+      ACAPY_DEBUG_CONNECTIONS: "true"
+      ACAPY_ENDPOINT: "http://agent-bob:${BOB_AGENT_PORT}"
+      ACAPY_LABEL: "Agent Bob"
+      ACAPY_LOG_LEVEL: "info"
+      # ACAPY_NO_LEDGER: "true"
+      LEDGER_URL: "http://dev.greenlight.bcovrin.vonx.io"
+      ADMIN_PORT: "${BOB_AGENT_ADMIN_PORT}"
+      AGENT_PORT: "${BOB_AGENT_PORT}"
+    entrypoint: /bin/bash
+    command: ["-c",
+        "aca-py start \
+        --admin '0.0.0.0' ${BOB_AGENT_ADMIN_PORT} \
+        --inbound-transport http '0.0.0.0' ${BOB_AGENT_PORT} \
+        --outbound-transport http \
+        --genesis-url ${LEDGER_URL}/genesis \
+        --seed Bob00000000000000000000000000111 \
+        --auto-provision \
+        --auto-accept-invites \
+        --auto-accept-requests \ 
+        --auto-ping-connection \
+        --wallet-type indy \
+        --wallet-name Bob1 \
+        --wallet-key secret \
+        "
+    ]
+    ports:
+      - "${BOB_AGENT_ADMIN_PORT}:${BOB_AGENT_ADMIN_PORT}"
+    restart: always

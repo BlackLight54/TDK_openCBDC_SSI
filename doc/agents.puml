@@ -1,0 +1,11 @@
+@startuml Agents in model
+actor Citizen as A
+entity "Sentinel Guard" as SG
+entity Government as G
+entity "Central Bank" as CB
+
+G -- A  : Issues citizenship VC
+CB -- A : Onboarding, KYC, Issues CB-VC, Enables DigiCash-Like privacy
+SG -- A : Manages transactions 
+
+@enduml
