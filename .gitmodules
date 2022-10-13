@@ -10,3 +10,6 @@
 [submodule "indy-sdk"]
 	path = indy-sdk
 	url = https://github.com/BlackLight54/bsc-thesis-indy-sdk.git
+[submodule "aries-acapy-controllers"]
+	path = aries-acapy-controllers
+	url = https://github.com/hyperledger/aries-acapy-controllers.git
