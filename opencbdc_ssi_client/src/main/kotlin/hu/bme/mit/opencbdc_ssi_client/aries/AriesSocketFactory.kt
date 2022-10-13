@@ -6,13 +6,13 @@ import org.springframework.beans.factory.FactoryBean
 
 
 @lombok.NoArgsConstructor
-class AriesSocketFactory(var url: String) : FactoryBean<AriesWebSocketClient> {
+class AriesSocketFactory(var url: String, var eventHandler : EventHandler) : FactoryBean<AriesWebSocketClient> {
 
     override fun getObject(): AriesWebSocketClient {
         return AriesWebSocketClient
             .builder()
             .url(url) // optional - defaults to ws://localhost:8031/ws
-            .handler(EventHandler.DefaultEventHandler()) // optional - your handler implementation
+            .handler(eventHandler) // optional - your handler implementation
             // .bearerToken(bearer) // optional - jwt token - only when running in multi tenant mode
             .build();
     }

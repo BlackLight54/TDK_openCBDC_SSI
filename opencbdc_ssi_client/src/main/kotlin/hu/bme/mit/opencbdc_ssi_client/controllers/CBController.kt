@@ -7,8 +7,7 @@ import org.springframework.context.support.AbstractApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 import javax.annotation.PostConstruct
 
-
-class CitizenController(var name: String) : EventHandler() {
+class CBController(var name: String) : EventHandler() {
 
 
     lateinit var ariesClient: AriesClient

@@ -5,11 +5,11 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class CitizenConfig {
-    @Bean
+    @Bean(name = ["aliceController"])
     fun Alice(): CitizenController {
         return CitizenController("alice")
     }
-    @Bean
+    @Bean(name = ["bobController"])
     fun Bob(): CitizenController {
         return CitizenController("bob")
     }

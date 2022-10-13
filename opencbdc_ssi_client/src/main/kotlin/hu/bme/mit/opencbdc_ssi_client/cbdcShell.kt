@@ -16,4 +16,6 @@ class cbdcShell {
     fun onboardAlice() {
         log.info("Onboarding Alice")
     }
+
+
 }
