@@ -21,7 +21,6 @@ services:
         --admin '0.0.0.0' ${ALICE_AGENT_ADMIN_PORT} \
         --inbound-transport http '0.0.0.0' ${ALICE_AGENT_PORT} \
         --outbound-transport http  \
-        --endpoint
         --genesis-url ${LEDGER_URL}/genesis \
         --seed Alice000000000000000000000000111 \        
         --auto-provision \
@@ -37,7 +36,7 @@ services:
       - "${ALICE_AGENT_PORT}:${ALICE_AGENT_PORT}"
       - "${ALICE_AGENT_ADMIN_PORT}:${ALICE_AGENT_ADMIN_PORT}"
     restart: always
-
+    
   agent-bob:
     image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5-rc0
     container_name: agent-bob
@@ -73,3 +72,137 @@ services:
       - "${BOB_AGENT_PORT}:${BOB_AGENT_PORT}"
       - "${BOB_AGENT_ADMIN_PORT}:${BOB_AGENT_ADMIN_PORT}"
     restart: always
+   
+
+  agent-sentinel:
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5-rc0
+    container_name: agent-sentinel
+    environment:
+      ACAPY_WALLET_SEED: Sentinel000000000000000000000111
+      ACAPY_WALLET_TYPE: indy
+      # ACAPY_WALLET_STORAGE_TYPE: BASIC
+      # ACAPY_WALLET_STORAGE_CONFIG: '{"url":"172.17.0.1:5432","wallet_scheme":"DatabasePerWallet"}'
+      # ACAPY_WALLET_STORAGE_CREDS: '{"account":"postgres","password":"mysecretpassword","admin_account":"postgres","admin_password":"mysecretpassword"}'
+      ACAPY_WALLET_NAME: sentinel_wallet
+      ACAPY_WALLET_KEY: sentinel
+
+      ACAPY_GENESIS_URL: http://dev.greenlight.bcovrin.vonx.io/genesis
+      ACAPY_INBOUND_TRANSPORT: 'http "0.0.0.0" ${SENTINEL_AGENT_PORT}'
+      ACAPY_ENDPOINT: http://host.docker.internal:${SENTINEL_AGENT_PORT}
+      ACAPY_OUTBOUND_TRANSPORT: http
+      ACAPY_ADMIN: '[ "0.0.0.0" , "${SENTINEL_AGENT_ADMIN_PORT}" ]'
+      ACAPY_ADMIN_INSECURE_MODE: true
+      
+      ACAPY_LABEL: Agent Sentinel
+      ACAPY_PUBLIC_INVITES: true
+      # ACAPY_MULTITENANT: true
+      # ACAPY_MULTITENANT_ADMIN: true
+      # ACAPY_JWT_SECRET: abcd1234
+
+      ACAPY_AUTO_PROVISION: true
+      ACAPY_AUTO_ACCEPT_INVITES: true
+      ACAPY_AUTO_ACCEPT_REQUESTS: true
+      ACAPY_AUTO_PING_CONNECTION: true
+    entrypoint: /bin/bash
+    command: ["-c",
+        "aca-py start \
+         --inbound-transport http '0.0.0.0' ${SENTINEL_AGENT_PORT} \
+         "]    
+    ports:
+      - "${SENTINEL_AGENT_PORT}:${SENTINEL_AGENT_PORT}"
+      - "${SENTINEL_AGENT_ADMIN_PORT}:${SENTINEL_AGENT_ADMIN_PORT}"
+    restart: unless-stopped
+  
+  agent-gov:
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5-rc0
+    container_name: agent-gov
+    environment:
+      ACAPY_WALLET_SEED: Gov00000000000000000000000000111
+      ACAPY_WALLET_TYPE: indy
+      # ACAPY_WALLET_STORAGE_TYPE: BASIC
+      # ACAPY_WALLET_STORAGE_CONFIG: '{"url":"172.17.0.1:5432","wallet_scheme":"DatabasePerWallet"}'
+      # ACAPY_WALLET_STORAGE_CREDS: '{"account":"postgres","password":"mysecretpassword","admin_account":"postgres","admin_password":"mysecretpassword"}'
+      ACAPY_WALLET_NAME: gov_wallet
+      ACAPY_WALLET_KEY: gov
+
+      ACAPY_GENESIS_URL: http://dev.greenlight.bcovrin.vonx.io/genesis
+      ACAPY_INBOUND_TRANSPORT: 'http "0.0.0.0" ${GOVERNMENT_AGENT_PORT}'
+      ACAPY_ENDPOINT: http://host.docker.internal:${GOVERNMENT_AGENT_PORT}
+      ACAPY_OUTBOUND_TRANSPORT: http
+      ACAPY_ADMIN: '[ "0.0.0.0" , "${GOVERNMENT_AGENT_ADMIN_PORT}" ]'
+      ACAPY_ADMIN_INSECURE_MODE: true
+      
+      ACAPY_LABEL: Agent Sentinel
+      ACAPY_PUBLIC_INVITES: true
+      # ACAPY_MULTITENANT: true
+      # ACAPY_MULTITENANT_ADMIN: true
+      # ACAPY_JWT_SECRET: abcd1234
+
+      ACAPY_AUTO_PROVISION: true
+      ACAPY_AUTO_ACCEPT_INVITES: true
+      ACAPY_AUTO_ACCEPT_REQUESTS: true
+      ACAPY_AUTO_PING_CONNECTION: true
+    entrypoint: /bin/bash
+    command: ["-c",
+        "aca-py start \
+         --inbound-transport http '0.0.0.0' ${GOVERNMENT_AGENT_PORT} \
+         "]    
+    ports:
+      - "${GOVERNMENT_AGENT_PORT}:${GOVERNMENT_AGENT_PORT}"
+      - "${GOVERNMENT_AGENT_ADMIN_PORT}:${GOVERNMENT_AGENT_ADMIN_PORT}"
+    restart: unless-stopped
+
+  agent-cb:
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5-rc0
+    container_name: agent-cb
+    environment:
+      ACAPY_WALLET_SEED: CentralBank000000000000000000111
+      ACAPY_WALLET_TYPE: indy
+      # ACAPY_WALLET_STORAGE_TYPE: BASIC
+      # ACAPY_WALLET_STORAGE_CONFIG: '{"url":"172.17.0.1:5432","wallet_scheme":"DatabasePerWallet"}'
+      # ACAPY_WALLET_STORAGE_CREDS: '{"account":"postgres","password":"mysecretpassword","admin_account":"postgres","admin_password":"mysecretpassword"}'
+      ACAPY_WALLET_NAME: cb_wallet
+      ACAPY_WALLET_KEY: cb
+
+      ACAPY_GENESIS_URL: http://dev.greenlight.bcovrin.vonx.io/genesis
+      ACAPY_INBOUND_TRANSPORT: 'http "0.0.0.0" ${CENTRAL_BANK_AGENT_PORT}'
+      ACAPY_ENDPOINT: http://host.docker.internal:${CENTRAL_BANK_AGENT_PORT}
+      ACAPY_OUTBOUND_TRANSPORT: http
+      ACAPY_ADMIN: '[ "0.0.0.0" , "${CENTRAL_BANK_AGENT_ADMIN_PORT}" ]'
+      ACAPY_ADMIN_INSECURE_MODE: true
+      
+      ACAPY_LABEL: Agent Sentinel
+      ACAPY_PUBLIC_INVITES: true
+      # ACAPY_MULTITENANT: true
+      # ACAPY_MULTITENANT_ADMIN: true
+      # ACAPY_JWT_SECRET: abcd1234
+
+      ACAPY_AUTO_PROVISION: true
+      ACAPY_AUTO_ACCEPT_INVITES: true
+      ACAPY_AUTO_ACCEPT_REQUESTS: true
+      ACAPY_AUTO_PING_CONNECTION: true
+    entrypoint: /bin/bash
+    command: ["-c",
+        "aca-py start \
+         --inbound-transport http '0.0.0.0' ${CENTRAL_BANK_AGENT_PORT} \
+         "]    
+    ports:
+      - "${CENTRAL_BANK_AGENT_PORT}:${CENTRAL_BANK_AGENT_PORT}"
+      - "${CENTRAL_BANK_AGENT_ADMIN_PORT}:${CENTRAL_BANK_AGENT_ADMIN_PORT}"
+    restart: unless-stopped
+
+  controller:
+    container_name: controller
+    build:
+      context: ../
+      dockerfile: ./docker/client.Dockerfile
+    depends_on: 
+      - agent-alice        
+      - agent-bob
+      - agent-sentinel
+      - agent-gov
+      - agent-cb
+    ports:
+      - "9000:9000"
+    tty: true
+        
