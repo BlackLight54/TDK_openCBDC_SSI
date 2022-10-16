@@ -14,18 +14,20 @@
 
     </bean>
     <bean id="aliceWebsocketClient" class="hu.bme.mit.opencbdc_ssi_client.aries.AriesSocketFactory">
-        <constructor-arg index = "0" value="http://localhost:8001/ws"/>
+        <constructor-arg index = "0" value="http://host.docker.internal:8001/ws"/>
         <constructor-arg index = "1" ref="aliceController"/>
 
     </bean>
     <bean id="aliceClient" class="hu.bme.mit.opencbdc_ssi_client.aries.AriesClientFactory">
-        <constructor-arg value="http://localhost:8001"/>
+        <constructor-arg value="http://host.docker.internal:8001"/>
     </bean>
     <bean id="bobWebsocketClient" class="hu.bme.mit.opencbdc_ssi_client.aries.AriesSocketFactory">
-        <constructor-arg index = "0" value="http://localhost:8011/ws"/>
+        <constructor-arg index = "0" value="http://host.docker.internal:8011/ws"/>
         <constructor-arg index = "1" ref="bobController"/>
     </bean>
     <bean id="bobClient" class="hu.bme.mit.opencbdc_ssi_client.aries.AriesClientFactory">
-        <constructor-arg value="http://localhost:8011"/>
+        <constructor-arg value="http://host.docker.internal:8011"/>
     </bean>
+    <bean id="endpoint" class="hu.bme.mit.opencbdc_ssi_client.Endpoints"/>
+
 </beans>
