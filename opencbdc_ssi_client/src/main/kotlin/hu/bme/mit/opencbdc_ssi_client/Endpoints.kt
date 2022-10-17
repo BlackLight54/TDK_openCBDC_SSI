@@ -1,10 +1,8 @@
 package hu.bme.mit.opencbdc_ssi_client
 
-import hu.bme.mit.opencbdc_ssi_client.controllers.CBController
-import hu.bme.mit.opencbdc_ssi_client.controllers.CitizenController
-import hu.bme.mit.opencbdc_ssi_client.controllers.GovController
-import hu.bme.mit.opencbdc_ssi_client.controllers.SentinelController
-import org.hyperledger.aries.api.AcaPyRequestFilter.log
+import hu.bme.mit.opencbdc_ssi_client.controllers.*
+import org.hyperledger.aries.api.AcaPyRequestFilter
+import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import javax.annotation.PostConstruct
@@ -18,16 +16,17 @@ class Endpoints(
     val govController: GovController
 ) {
 
+    var log = LoggerFactory.getLogger(Endpoints::class.java)
 
     @PostConstruct
     fun init() {
-//        val context = ClassPathXmlApplicationContext("factorybean-spring-ctx.xml")
-//        aliceController = context.getBean("aliceController", CitizenController::class.java)
-//        bobController = context.getBean("bobController", CitizenController::class.java)
-//        // sentinelController = context.getBean("sentinelController", SentinelController::class.java)
-//        // cbController = context.getBean("cbController", CBController::class.java)
-//        govController = context.getBean("governmentController", GovController::class.java)
 
+    }
+
+    @GetMapping("/connect")
+    fun connect() {
+        estabilishConnections(aliceController)
+        estabilishConnections(bobController)
     }
 
     @GetMapping("/onboard")
@@ -37,16 +36,31 @@ class Endpoints(
         return ""
     }
 
-    private fun onBoard(citizen: CitizenController) {
-        estabilishConnections(citizen)
+    @GetMapping("/auditableTx")
+    fun auditableTx(): String {
 
+        return ""
+    }
+    @GetMapping("/privateTx")
+    fun privateTx(): String {
+
+        return ""
+    }
+
+    private fun onBoard(citizen: CitizenController) {
+        citizen.sendBasicMessage("onboard", govController.name)
     }
 
     private fun estabilishConnections(citizen: CitizenController) {
-        log.info("Establishing connections for ${citizen.name}")
-        log.info("Establishing connection with gov")
-        val invitation = govController.createInvitaion().invitation
-        citizen.acceptInvitation(invitation, "gov")
-
+        estabilishConnection(citizen, govController)
+        estabilishConnection(citizen, cbController)
+        estabilishConnection(citizen, sentinelController)
     }
+
+    private fun estabilishConnection(citizen: CitizenController, entity: Controller) {
+        log.info("Establishing connection: ${citizen.name} -> ${entity.name}")
+        val invitation = entity.createInvitaion().invitation
+        citizen.acceptInvitation(invitation, entity.name)
+    }
+
 }

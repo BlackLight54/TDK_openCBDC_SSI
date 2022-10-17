@@ -15,7 +15,6 @@ import javax.annotation.Resource
 
 class GovController(_name :String , _url : String) : Controller(_name,_url) {
 
-    fun createInvitaion(): CreateInvitationResponse {
-        return ariesClient.connectionsCreateInvitation(CreateInvitationRequest()).get()
-    }
+
+
 }

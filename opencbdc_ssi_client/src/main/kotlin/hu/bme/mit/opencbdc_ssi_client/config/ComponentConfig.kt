@@ -12,9 +12,16 @@ import org.springframework.context.annotation.Configuration
 class ComponentConfig {
     val aliceUrl: String = "http://localhost:8001"
     val bobUrl: String = "http://localhost:8011"
-    val sentinelUrl : String = "http://localhost:8021"
-    val govUrl : String = "http://localhost:8031"
-    val cbUrl : String = "http://localhost:8041"
+    val sentinelUrl: String = "http://localhost:8021"
+    val govUrl: String = "http://localhost:8031"
+    val cbUrl: String = "http://localhost:8041"
+
+
+//    val aliceUrl: String = "http://host.docker.internal:8001"
+//    val bobUrl: String = "http://host.docker.internal:8011"
+//    val sentinelUrl: String = "http://host.docker.internal:8021"
+//    val govUrl: String = "http://host.docker.internal:8031"
+//    val cbUrl: String = "http://host.docker.internal:8041"
 
     @Bean(name = ["aliceController"])
     fun aliceController(): CitizenController {
@@ -25,16 +32,19 @@ class ComponentConfig {
     fun bobController(): CitizenController {
         return CitizenController("bob", bobUrl)
     }
+
     @Bean(name = ["sentinelController"])
-    fun sentinelController() : SentinelController {
+    fun sentinelController(): SentinelController {
         return SentinelController("sentinel", sentinelUrl)
     }
+
     @Bean(name = ["govController"])
-    fun govController() : GovController {
+    fun govController(): GovController {
         return GovController("gov", govUrl)
     }
+
     @Bean(name = ["cbController"])
-    fun cbController() : CBController {
+    fun cbController(): CBController {
         return CBController("cb", cbUrl)
     }
 

@@ -13,14 +13,7 @@ import javax.annotation.PostConstruct
 class CitizenController(_name : String, _url : String): Controller(_name, _url) {
 
 
-//        @PostConstruct
-//    fun init() {
-////        val context : AbstractApplicationContext = ClassPathXmlApplicationContext("factorybean-spring-ctx.xml")
-//
-////        ariesWebSocketClient = context.getBean(name + "WebsocketClient", AriesWebSocketClient::class.java)
-////        ariesClient = context.getBean(name + "Client", AriesClient::class.java)
-//
-//    }
+
     fun acceptInvitation(invitation: ConnectionInvitation, alias: String) {
         ariesClient.connectionsReceiveInvitation(
             ReceiveInvitationRequest.builder()
@@ -39,5 +32,6 @@ class CitizenController(_name : String, _url : String): Controller(_name, _url) 
     fun pay() {
         println("Paying")
     }
+
 
 }

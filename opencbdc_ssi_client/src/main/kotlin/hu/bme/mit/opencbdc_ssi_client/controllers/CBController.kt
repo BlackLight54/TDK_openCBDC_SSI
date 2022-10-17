@@ -14,17 +14,7 @@ import javax.annotation.Resource
 class CBController(_name :String , _url : String) : Controller(_name,_url) {
 
 
-//    @PostConstruct
-//    fun init() {
-//        val context: AbstractApplicationContext = ClassPathXmlApplicationContext("factorybean-spring-ctx.xml")
-//
-//        ariesWebSocketClient = context.getBean(name + "WebsocketClient", AriesWebSocketClient::class.java)
-//        ariesClient = context.getBean(name + "Client", AriesClient::class.java)
-//
-//    }
 
-    fun pay() {
-        println("Paying")
-    }
+
 
 }
