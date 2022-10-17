@@ -148,7 +148,7 @@ services:
       ACAPY_ADMIN: '[ "0.0.0.0" , "${GOVERNMENT_AGENT_ADMIN_PORT}" ]'
       ACAPY_ADMIN_INSECURE_MODE: true
       
-      ACAPY_LABEL: Agent Sentinel
+      ACAPY_LABEL: Agent Government
       ACAPY_PUBLIC_INVITES: true
       # ACAPY_MULTITENANT: true
       # ACAPY_MULTITENANT_ADMIN: true
@@ -187,7 +187,7 @@ services:
       ACAPY_ADMIN: '[ "0.0.0.0" , "${CENTRAL_BANK_AGENT_ADMIN_PORT}" ]'
       ACAPY_ADMIN_INSECURE_MODE: true
       
-      ACAPY_LABEL: Agent Sentinel
+      ACAPY_LABEL: Agent Central Bank
       ACAPY_PUBLIC_INVITES: true
       # ACAPY_MULTITENANT: true
       # ACAPY_MULTITENANT_ADMIN: true
