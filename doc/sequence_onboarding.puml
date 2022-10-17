@@ -1,50 +1,69 @@
 @startuml Onboarding openCBDC w/SSI sequence diagram
+'based on partly https://github.com/hyperledger/aries-cloudagent-python/blob/main/demo/AriesOpenAPIDemo.md
 actor Alice as A 
 participant "Central Bank" as CB 
 database "SSI ledger" as SSI
+group estabilish connection
+CB -> CB : create connection invitation 
+activate CB
+CB -> A : Connection invitation JSON
+deactivate CB  
+A -> A : Recieve invitation
+A -> A : Accept invitation
+A -> CB : connection request webhook 
+CB -> CB : Accept connection request
+hnote over A, CB : Connection status can be checked at this point
+end  
 
+hnote over CB 
+There are preparations for crediential issuance, specifically:
+----
+- register a public DID and stored it on the ledger;
+- create a schema and register it on the ledger;
+- create a credential definition and register it on the ledger.
+----
+During initalization we may check if the schema and credential definitions on the ledger.
+end
+end note 
 A -> CB : Open account request
 activate CB
 CB ->  A : check KYC
 activate A
-A -> CB : present KYC
+A -> CB : present KYC proofs
 deactivate A
 
-opt KYC check passed
+group crediential issuance [ KYC check passed]
+CB -> CB : get Cred def
+activate CB
+CB -> CB : create credential offer
 CB -> A : Cred offer
+deactivate CB
 note right
 ? Crediential may contain a key derived from the master secret?
 end note 
 deactivate CB
 activate A
-opt !has Master secret 
-    A-> A : Create mater secret
-    note right 
-        ? Each person may have one master 
-        secret associated with them,
-        which is associated with both 
-        the KYC VCs and the "Account" VC
-    end note 
-end
+
 A -> SSI : Get cred def
 activate SSI
 SSI -> A : Cred def
 deactivate SSI
 A -> A : create cred reqest
- A -> CB : cred request
+ A -> CB : cred request (callback)
  activate CB 
-CB -> CB : Create crediential
+CB -> CB : Issue crediential
 CB -> SSI : publish crediential to revocation registry
 activate SSI
 SSI -> CB 
 deactivate SSI
-CB -> A : issued crediential 
+CB -> A : issued crediential (callback)
 deactivate CB
 A -> SSI : Get crediantial revocation registry definition 
 activate SSI 
-SSI -> A : Rvocation registry definition
+SSI -> A : Revocation registry definition
 deactivate SSI
 A -> A : Store crediential in wallet
+A -> A : Store cred id
 deactivate A
 end 
 

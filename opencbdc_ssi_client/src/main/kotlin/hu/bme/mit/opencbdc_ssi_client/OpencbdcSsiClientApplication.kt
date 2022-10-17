@@ -8,19 +8,7 @@ import org.springframework.boot.runApplication
 
 
 @SpringBootApplication
-class OpencbdcSsiClientApplication /*: CommandLineRunner*/{
-    /*
-    private val LOG: Logger = LoggerFactory
-        .getLogger(OpencbdcSsiClientApplication::class.java)
-
-    @Override
-    override fun run(vararg args: String?) {
-        LOG.info("EXECUTING : command line runner")
-        for (i in args.indices) {
-            LOG.info("args[{}]: {}", i, args[i])
-        }
-    }*/
-}
+class OpencbdcSsiClientApplication
 fun main(args: Array<String>) {
     runApplication<OpencbdcSsiClientApplication>(*args)
 }
