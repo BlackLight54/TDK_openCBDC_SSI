@@ -20,7 +20,7 @@ services:
       ACAPY_ADMIN: '[ "0.0.0.0" , "${ALICE_AGENT_ADMIN_PORT}" ]'
       ACAPY_ADMIN_INSECURE_MODE: true
       
-      ACAPY_LABEL: Agent Alice
+      ACAPY_LABEL: alice
       ACAPY_PUBLIC_INVITES: true
       # ACAPY_MULTITENANT: true
       # ACAPY_MULTITENANT_ADMIN: true
@@ -30,7 +30,13 @@ services:
       ACAPY_AUTO_ACCEPT_INVITES: true
       ACAPY_AUTO_ACCEPT_REQUESTS: true
       ACAPY_AUTO_PING_CONNECTION: true
-  
+      ACAPY_AUTO_RESPOND_CREDENTIAL_OFFER: true
+      ACAPY_AUTO_RESPOND_CREDENTIAL_REQUEST:  true
+      ACAPY_AUTO_RESPOND_PRESENTATION_PROPOSAL: true
+      ACAPY_AUTO_RESPOND_PRESENTATION_REQUEST: true
+      ACAPY_AUTO_STORE_CREDENTIAL: true
+      ACAPY_AUTO_VERIFY_PRESENTATION: true
+
       ACAPY_DEBUG_CONNECTIONS: "true"     
       ACAPY_LOG_LEVEL: "info"
 
@@ -44,6 +50,8 @@ services:
       - "${ALICE_AGENT_PORT}:${ALICE_AGENT_PORT}"
       - "${ALICE_AGENT_ADMIN_PORT}:${ALICE_AGENT_ADMIN_PORT}"
     restart: always
+
+    
     
   agent-bob:
     image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5-rc0
@@ -64,7 +72,7 @@ services:
       ACAPY_ADMIN: '[ "0.0.0.0" , "${BOB_AGENT_ADMIN_PORT}" ]'
       ACAPY_ADMIN_INSECURE_MODE: true
       
-      ACAPY_LABEL: Agent Bob
+      ACAPY_LABEL: bob
       ACAPY_PUBLIC_INVITES: true
       # ACAPY_MULTITENANT: true
       # ACAPY_MULTITENANT_ADMIN: true
@@ -74,6 +82,12 @@ services:
       ACAPY_AUTO_ACCEPT_INVITES: true
       ACAPY_AUTO_ACCEPT_REQUESTS: true
       ACAPY_AUTO_PING_CONNECTION: true
+      ACAPY_AUTO_RESPOND_CREDENTIAL_OFFER: true
+      ACAPY_AUTO_RESPOND_CREDENTIAL_REQUEST:  true
+      ACAPY_AUTO_RESPOND_PRESENTATION_PROPOSAL: true
+      ACAPY_AUTO_RESPOND_PRESENTATION_REQUEST: true
+      ACAPY_AUTO_STORE_CREDENTIAL: true
+      ACAPY_AUTO_VERIFY_PRESENTATION: true
   
       ACAPY_DEBUG_CONNECTIONS: "true"     
       ACAPY_LOG_LEVEL: "info"
@@ -109,7 +123,7 @@ services:
       ACAPY_ADMIN: '[ "0.0.0.0" , "${SENTINEL_AGENT_ADMIN_PORT}" ]'
       ACAPY_ADMIN_INSECURE_MODE: true
       
-      ACAPY_LABEL: Agent Sentinel
+      ACAPY_LABEL: sentinel
       ACAPY_PUBLIC_INVITES: true
       # ACAPY_MULTITENANT: true
       # ACAPY_MULTITENANT_ADMIN: true
@@ -119,6 +133,13 @@ services:
       ACAPY_AUTO_ACCEPT_INVITES: true
       ACAPY_AUTO_ACCEPT_REQUESTS: true
       ACAPY_AUTO_PING_CONNECTION: true
+      ACAPY_AUTO_RESPOND_CREDENTIAL_OFFER: true
+      ACAPY_AUTO_RESPOND_CREDENTIAL_REQUEST:  true
+      ACAPY_AUTO_RESPOND_PRESENTATION_PROPOSAL: true
+      ACAPY_AUTO_RESPOND_PRESENTATION_REQUEST: true
+      ACAPY_AUTO_STORE_CREDENTIAL: true
+      ACAPY_AUTO_VERIFY_PRESENTATION: true
+
     entrypoint: /bin/bash
     command: ["-c",
         "aca-py start \
@@ -148,7 +169,7 @@ services:
       ACAPY_ADMIN: '[ "0.0.0.0" , "${GOVERNMENT_AGENT_ADMIN_PORT}" ]'
       ACAPY_ADMIN_INSECURE_MODE: true
       
-      ACAPY_LABEL: Agent Government
+      ACAPY_LABEL: gov
       ACAPY_PUBLIC_INVITES: true
       # ACAPY_MULTITENANT: true
       # ACAPY_MULTITENANT_ADMIN: true
@@ -158,6 +179,13 @@ services:
       ACAPY_AUTO_ACCEPT_INVITES: true
       ACAPY_AUTO_ACCEPT_REQUESTS: true
       ACAPY_AUTO_PING_CONNECTION: true
+      ACAPY_AUTO_RESPOND_CREDENTIAL_OFFER: true
+      ACAPY_AUTO_RESPOND_CREDENTIAL_REQUEST:  true
+      ACAPY_AUTO_RESPOND_PRESENTATION_PROPOSAL: true
+      ACAPY_AUTO_RESPOND_PRESENTATION_REQUEST: true
+      ACAPY_AUTO_STORE_CREDENTIAL: true
+      ACAPY_AUTO_VERIFY_PRESENTATION: true
+
     entrypoint: /bin/bash
     command: ["-c",
         "aca-py start \
@@ -187,7 +215,7 @@ services:
       ACAPY_ADMIN: '[ "0.0.0.0" , "${CENTRAL_BANK_AGENT_ADMIN_PORT}" ]'
       ACAPY_ADMIN_INSECURE_MODE: true
       
-      ACAPY_LABEL: Agent Central Bank
+      ACAPY_LABEL: cb
       ACAPY_PUBLIC_INVITES: true
       # ACAPY_MULTITENANT: true
       # ACAPY_MULTITENANT_ADMIN: true
@@ -197,6 +225,13 @@ services:
       ACAPY_AUTO_ACCEPT_INVITES: true
       ACAPY_AUTO_ACCEPT_REQUESTS: true
       ACAPY_AUTO_PING_CONNECTION: true
+      ACAPY_AUTO_RESPOND_CREDENTIAL_OFFER: true
+      ACAPY_AUTO_RESPOND_CREDENTIAL_REQUEST:  true
+      ACAPY_AUTO_RESPOND_PRESENTATION_PROPOSAL: true
+      ACAPY_AUTO_RESPOND_PRESENTATION_REQUEST: true
+      ACAPY_AUTO_STORE_CREDENTIAL: true
+      ACAPY_AUTO_VERIFY_PRESENTATION: true
+      
     entrypoint: /bin/bash
     command: ["-c",
         "aca-py start \
@@ -207,18 +242,18 @@ services:
       - "${CENTRAL_BANK_AGENT_ADMIN_PORT}:${CENTRAL_BANK_AGENT_ADMIN_PORT}"
     restart: unless-stopped
 
-  controller:
-    container_name: controller
-    build:
-      context: ../
-      dockerfile: ./docker/client.Dockerfile
-    depends_on: 
-      - agent-alice        
-      - agent-bob
-      - agent-sentinel
-      - agent-gov
-      - agent-cb
-    ports:
-      - "9000:9000"
-    tty: true
+  # controller:
+  #   container_name: controller
+  #   build:
+  #     context: ../
+  #     dockerfile: ./docker/client.Dockerfile
+  #   depends_on: 
+  #     - agent-alice        
+  #     - agent-bob
+  #     - agent-sentinel
+  #     - agent-gov
+  #     - agent-cb
+  #   ports:
+  #     - "9000:9000"
+  #   tty: true
         

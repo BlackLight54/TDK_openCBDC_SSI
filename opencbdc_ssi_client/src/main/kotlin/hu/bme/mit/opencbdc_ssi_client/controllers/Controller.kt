@@ -1,10 +1,8 @@
 package hu.bme.mit.opencbdc_ssi_client.controllers
 
-import hu.bme.mit.opencbdc_ssi_client.Endpoints
 import org.hyperledger.acy_py.generated.model.SendMessage
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.AriesWebSocketClient
-import org.hyperledger.aries.api.AcaPyRequestFilter.log
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.connection.CreateInvitationRequest
 import org.hyperledger.aries.api.connection.CreateInvitationResponse
@@ -51,4 +49,6 @@ abstract class Controller(val name: String, val url: String) : EventHandler1() {
             .filter { connection -> connection.alias == alias }
             .findFirst().get()
     }
+
+
 }
