@@ -76,7 +76,7 @@ class GovController(_name: String, _url: String) : Controller(_name, _url) {
 
     private fun getSchema() {
         val schemaName = "citizen"
-        val schemaVersion = "1.6"
+        val schemaVersion = "1.7"
         log.info("Getting schema Id")
         val definedSchemas = ariesClient.schemasCreated(
             SchemasCreatedFilter

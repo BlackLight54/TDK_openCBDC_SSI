@@ -61,7 +61,7 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
         if (proof != null && proof.isVerified ) {
             val connection = ariesClient.connections().get().filter {conn -> conn.connectionId == proof.connectionId  }.first()
             log.info("recieved and verified proof: ${connection.theirLabel} : ${proof.isVerified}")
-            issueCbCredential(connection)
+            issueCredientialToConnection(connection)
         }
     }
 
@@ -87,7 +87,7 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
 
     private fun getSchemaId() : String{
         val schemaName = "CBCard"
-        val schemaVersion = "1.0"
+        val schemaVersion = "1.1"
         val schemaId : String
         log.info("Getting CB schema Id")
         val definedSchemas = ariesClient.schemasCreated(
