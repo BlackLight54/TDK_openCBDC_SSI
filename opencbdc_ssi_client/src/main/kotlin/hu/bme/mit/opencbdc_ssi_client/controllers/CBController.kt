@@ -19,15 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired
 
 
 class CBController(_name :String , _url : String) : Controller(_name,_url) {
-    // TODO: Implement Revocation
+    // TODO: Implement Revocation for CB VCs
+    // TODO: Implement revocation check for Gov VCs
     // TODO: check that only one VC is issued to one Citizenship VC
     @Autowired
     lateinit var govController : GovController
-    fun requestProof(credentialDefinitionId : String){
-        for (conn in ariesClient.connections().get().distinctBy { it.theirLabel }){
-            requestProof(conn, credentialDefinitionId)
-        }
-    }
+
+
     private fun requestProof(connection: ConnectionRecord, credentialDefinitionId: String){
         log.info("Requesting proof from: ${connection.theirLabel}")
         val proofRequest = PresentProofRequestHelper.buildForAllAttributes(
@@ -63,7 +61,7 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
     }
 
 
-    private fun getIssuerDid() : String{
+    fun getIssuerDid() : String{
         val issuerDID = ariesClient.walletDidPublic().get().did
         log.info("Got issuer DID: $issuerDID")
         return issuerDID
@@ -165,7 +163,7 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
             log.info("Credential Issued")
         }
     }
-
+    // Currently CB initiates the issuance of address VCs
     override fun handleConnection(connection: ConnectionRecord?) {
         super.handleConnection(connection)
         if (connection != null) {
@@ -175,6 +173,7 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
             }
         }
     }
+
 }
 
 

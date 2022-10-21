@@ -1,13 +1,21 @@
 package hu.bme.mit.opencbdc_ssi_client.controllers
 
+import hu.bme.mit.opencbdc_ssi_client.credientials.CBCred
 import org.hyperledger.acy_py.generated.model.ConnectionInvitation
 import org.hyperledger.acy_py.generated.model.V20CredStoreRequest
 import org.hyperledger.aries.api.connection.ConnectionReceiveInvitationFilter
 import org.hyperledger.aries.api.connection.ReceiveInvitationRequest
+import org.hyperledger.aries.api.credentials.CredentialAttributes
+import org.hyperledger.aries.api.credentials.CredentialPreview
+import org.hyperledger.aries.api.issue_credential_v1.V1CredentialProposalRequest
 import org.hyperledger.aries.api.issue_credential_v2.V2IssueCredentialRecordsFilter
 import org.hyperledger.aries.api.issue_credential_v2.V2IssueIndyCredentialEvent
+import org.springframework.beans.factory.annotation.Autowired
 
 class CitizenController(_name : String, _url : String): Controller(_name, _url) {
+
+    @Autowired
+    lateinit var cbController : CBController
 
     private fun acceptInvitation(invitation: ConnectionInvitation, alias: String) {
         ariesClient.connectionsReceiveInvitation(
@@ -31,17 +39,23 @@ class CitizenController(_name : String, _url : String): Controller(_name, _url) 
         this.acceptInvitation(invitation, entity.name)
     }
 
-
-    fun storeCredential(){
-        val issueCredientialRecordResponse = ariesClient.issueCredentialV2Records(V2IssueCredentialRecordsFilter.builder().build())
-        if (issueCredientialRecordResponse.isPresent && issueCredientialRecordResponse.get().isNotEmpty()) {
-            for(issueCredientialRecord in issueCredientialRecordResponse.get()){
-                log.info("Storing credential record: ex_id: ${issueCredientialRecord.credExRecord.credExId} ;credential_id: ${issueCredientialRecord.credExRecord.credIssue.atId}")
-                ariesClient.issueCredentialV2RecordsStore(issueCredientialRecord.credExRecord.credExId, V20CredStoreRequest(issueCredientialRecord.credExRecord.credExId))
-            }
-        }else {
-            log.info("No credential record to store")
-        }
-    }
+//    fun requestCBCred(){
+//        // send credential proposal to CB
+//        // TODO: Implement sending proposal to CB instead of CB sending out
+//        ariesClient.issueCredentialV2SendProposal(
+//            V1CredentialProposalRequest
+//            .builder()
+//            .issuerDid(cbController.getIssuerDid())
+//            .credentialDefinitionId(getCredentialDefinition())
+//            .schemaName(getSchemaId().split(":")[2])
+//            .schemaIssuerDid(getIssuerDid())
+//            .schemaVersion(getSchemaId().split(":")[3])
+//            .credentialProposal(
+//                CredentialPreview(
+//                    CredentialAttributes.from(CBCred(connection.theirLabel,connection.theirLabel + "::addr"))
+//                )
+//            )
+//            .build())
+//    }
 
 }

@@ -102,10 +102,11 @@ services:
       - "${BOB_AGENT_PORT}:${BOB_AGENT_PORT}"
       - "${BOB_AGENT_ADMIN_PORT}:${BOB_AGENT_ADMIN_PORT}"
     restart: always
-   
 
   agent-sentinel:
-    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5-rc0
+    build: 
+      context: ../
+      dockerfile: ./docker/sentinel.Dockerfile
     container_name: agent-sentinel
     environment:
       ACAPY_WALLET_SEED: Sentinel000000000000000000000111
