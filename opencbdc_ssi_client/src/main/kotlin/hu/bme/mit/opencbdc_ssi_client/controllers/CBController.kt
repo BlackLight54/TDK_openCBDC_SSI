@@ -15,12 +15,16 @@ import org.hyperledger.aries.api.present_proof_v2.V20PresSendRequestRequest
 import org.hyperledger.aries.api.schema.SchemaSendRequest
 import org.hyperledger.aries.api.schema.SchemasCreatedFilter
 import org.hyperledger.aries.pojo.PojoProcessor
+import org.springframework.beans.factory.annotation.Autowired
 
 
 class CBController(_name :String , _url : String) : Controller(_name,_url) {
-
+    // TODO: Implement Revocation
+    // TODO: check that only one VC is issued to one Citizenship VC
+    @Autowired
+    lateinit var govController : GovController
     fun requestProof(credentialDefinitionId : String){
-        for (conn in ariesClient.connections().get()){
+        for (conn in ariesClient.connections().get().distinctBy { it.theirLabel }){
             requestProof(conn, credentialDefinitionId)
         }
     }
@@ -34,13 +38,6 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
                 .addAttributeValueRestriction("citizenship", "Hungarian")
                 .build())
         )
-//        val proofRequest2 = PresentProofRequestHelper.buildProofRequest(
-//            connection.connectionId,
-//            mapOf("name" to ProofRequestedAttributes.builder()
-//                .name("name")
-//                .restriction()
-//                .build())
-//        )
         ariesClient.presentProofV2SendRequest(V20PresSendRequestRequest(
             true,
             "Citizenship proof for onboarding",
@@ -66,19 +63,6 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
     }
 
 
-
-
-    private fun issueCbCredential(connection: ConnectionRecord?) {
-
-    }
-
-
-    fun prepareForCredientialIssuance() {
-        getIssuerDid()
-        getSchemaId()
-        getCredentialDefinition()
-    }
-
     private fun getIssuerDid() : String{
         val issuerDID = ariesClient.walletDidPublic().get().did
         log.info("Got issuer DID: $issuerDID")
@@ -87,7 +71,7 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
 
     private fun getSchemaId() : String{
         val schemaName = "CBCard"
-        val schemaVersion = "1.1"
+        val schemaVersion = "1.6"
         val schemaId : String
         log.info("Getting CB schema Id")
         val definedSchemas = ariesClient.schemasCreated(
@@ -110,7 +94,6 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
                     .build()
             ).get().schemaId
         } else{
-            log.info("Schema already defined")
             schemaId = definedSchemas.first()
         }
         log.info("Schema id: $schemaId")
@@ -160,20 +143,6 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
         return credDefId
     }
 
-
-
-    // Currently the Goverment issues a valid citizenship credential to anyone who connects iwth it
-    override fun handleConnection(connection: ConnectionRecord?) {
-        super.handleConnection(connection)
-    }
-
-    fun issueCredientialToConnections() {
-        val connections = ariesClient.connections().get()
-        for (connection in connections) {
-            issueCredientialToConnection(connection)
-        }
-    }
-
     private fun issueCredientialToConnection(connection: ConnectionRecord?) {
         if (connection != null) {
             log.info("Issuing credential to connection ${connection.connectionId}: ${connection.theirLabel}")
@@ -194,6 +163,16 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
                     .build()
             )
             log.info("Credential Issued")
+        }
+    }
+
+    override fun handleConnection(connection: ConnectionRecord?) {
+        super.handleConnection(connection)
+        if (connection != null) {
+//            log.info("${connection.theirLabel}: ${connection.state.name}")
+            if (connection.state.name == "ACTIVE" ){
+                requestProof(connection,govController.getCredentialDefinition())
+            }
         }
     }
 }

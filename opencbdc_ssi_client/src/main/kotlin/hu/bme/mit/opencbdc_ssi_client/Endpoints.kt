@@ -17,27 +17,21 @@ class Endpoints(
 
     var log = LoggerFactory.getLogger(Endpoints::class.java)
 
-    @PostConstruct
-    fun init() {
-
+    @GetMapping("/connectToGov")
+    fun connectToGov() {
+        aliceController.establishConnection(govController)
+        bobController.establishConnection(govController)
     }
 
-    @GetMapping("/connect")
-    fun connect() {
-        establishConnections(aliceController)
-        establishConnections(bobController)
+    @GetMapping("/connectToCB")
+    private fun establishConnections() {
+        aliceController.establishConnection(cbController)
+        bobController.establishConnection(cbController)
     }
-
-    @GetMapping("/onboard")
-    fun onboard(): String {
-        onBoard(aliceController);
-        onBoard(bobController);
-        return ""
-    }
-
     @GetMapping("/auditableTx")
     fun auditableTx(): String {
-
+        aliceController.establishConnection(sentinelController)
+        bobController.establishConnection(sentinelController)
         return ""
     }
     @GetMapping("/privateTx")
@@ -45,35 +39,10 @@ class Endpoints(
 
         return ""
     }
-    @GetMapping("/defineCreds")
-    fun defineCreds(): String {
-        govController.prepareForCredientialIssuance()
-        return ""
-    }
-    @GetMapping("/issueGovCreds")
-    fun issueCreds(): String {
-      govController.issueCredientialToConnections()
-        return ""
-    }
 
-    @GetMapping("/recCreds")
-    fun recCreds(){
-        aliceController.storeCredential()
-        bobController.storeCredential()
-    }
-    @GetMapping("/reqProof")
-    fun reqProof(){
-        cbController.requestProof(govController.citizenCredDefId)
-    }
-    private fun onBoard(citizen: CitizenController) {
-        citizen.sendBasicMessage("onboard", govController.name)
-    }
 
-    private fun establishConnections(citizen: CitizenController) {
-        citizen.establishConnection(govController)
-        citizen.establishConnection(cbController)
-        citizen.establishConnection(sentinelController)
-    }
+
+
 
 
 

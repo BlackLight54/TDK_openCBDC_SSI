@@ -14,38 +14,69 @@ import org.hyperledger.aries.pojo.PojoProcessor
 
 class GovController(_name: String, _url: String) : Controller(_name, _url) {
 
-    lateinit var citizenSchemaId: String
-    lateinit var citizenCredDefId: String
-    lateinit var issuerDid : String
+
 
     fun prepareForCredientialIssuance() {
         getIssuerDid()
-        getSchema()
+        getSchemaId()
         getCredentialDefinition()
     }
 
-    private fun getIssuerDid() {
-        log.info("Getting issuer DID")
-        issuerDid = ariesClient.walletDidPublic().get().did
+    private fun getIssuerDid() : String {
+        val issuerDid = ariesClient.walletDidPublic().get().did
         log.info("Got issuer DID: $issuerDid")
+        return issuerDid
     }
 
-    private fun getCredentialDefinition() {
+    private fun getSchemaId() : String {
+        val schemaName = "citizen"
+        val schemaVersion = "1.12"
+        log.info("Getting schema Id")
+        val definedSchemas = ariesClient.schemasCreated(
+            SchemasCreatedFilter
+                .builder()
+                .schemaName(schemaName)
+                .schemaVersion(schemaVersion)
+                .build()
+        ).get()
+        val schemaId : String
+        if (definedSchemas.isEmpty()) {
+            log.info("Schema doesn't exist in wallet -> posting Schema")
+            schemaId = ariesClient.schemas(
+                SchemaSendRequest
+                    .builder()
+                    .schemaName(schemaName)
+                    .schemaVersion(schemaVersion)
+                    .attributes(
+                        PojoProcessor.fieldNames(CitizenCred::class.java).toList()
+                    )
+                    .build()
+            ).get().schemaId
+        } else{
+            log.info("Schema already defined")
+            schemaId = definedSchemas.first()
+        }
+        log.info("Schema id: $schemaId")
+        return schemaId
+    }
+
+
+
+    fun getCredentialDefinition() :String {
         log.info("Getting credential definition")
-        log.info("Fetching credDefs from wallet")
         val citizenCredDefWalletResp = ariesClient.credentialDefinitionsCreated(
             CredentialDefinitionFilter
                 .builder()
-                .schemaId(citizenSchemaId)
+                .schemaId(getSchemaId())
                 .build()
         )
 
+        val credDefId : String
 
         // check if Cred def in wallet
         if (citizenCredDefWalletResp.isPresent && citizenCredDefWalletResp.get().credentialDefinitionIds.isNotEmpty()
         ) {
-            log.info("Credential definition already exists in wallet")
-            citizenCredDefId = citizenCredDefWalletResp.get().credentialDefinitionIds.first()
+            credDefId = citizenCredDefWalletResp.get().credentialDefinitionIds.first()
         }
 //        else {
 //            // check if cred def on ledger
@@ -60,10 +91,10 @@ class GovController(_name: String, _url: String) : Controller(_name, _url) {
             // Create and post cred def to ledger
             else {
                 log.info("Creating crediential definition")
-                citizenCredDefId = ariesClient.credentialDefinitionsCreate(
+                credDefId = ariesClient.credentialDefinitionsCreate(
                     CredentialDefinition.CredentialDefinitionRequest
                         .builder()
-                        .schemaId(citizenSchemaId)
+                        .schemaId(getSchemaId())
 //                        .supportRevocation(true)
 //                        .revocationRegistrySize(1000)
                         .tag("default")
@@ -71,42 +102,20 @@ class GovController(_name: String, _url: String) : Controller(_name, _url) {
                 ).get().credentialDefinitionId
             }
 //        }
-        log.info("Credential definition: id: $citizenCredDefId")
+        log.info("Credential definition: id: $credDefId")
+        return credDefId
     }
 
-    private fun getSchema() {
-        val schemaName = "citizen"
-        val schemaVersion = "1.7"
-        log.info("Getting schema Id")
-        val definedSchemas = ariesClient.schemasCreated(
-            SchemasCreatedFilter
-                .builder()
-                .schemaName(schemaName)
-                .schemaVersion(schemaVersion)
-                .build()
-        ).get()
-        if (definedSchemas.isEmpty()) {
-            log.info("Schema doesn't exist in wallet -> posting Schema")
-            citizenSchemaId = ariesClient.schemas(
-                SchemaSendRequest
-                    .builder()
-                    .schemaName(schemaName)
-                    .schemaVersion(schemaVersion)
-                    .attributes(
-                        PojoProcessor.fieldNames(CitizenCred::class.java).toList()
-                    )
-                    .build()
-            ).get().schemaId
-        } else{
-            log.info("Schema already defined")
-            citizenSchemaId = definedSchemas.first()
-        }
-        log.info("Schema id: $citizenSchemaId")
-    }
 
     // Currently the Goverment issues a valid citizenship credential to anyone who connects iwth it
     override fun handleConnection(connection: ConnectionRecord?) {
         super.handleConnection(connection)
+        if (connection != null) {
+//            log.info("${connection.theirLabel}: ${connection.state.name}")
+            if (connection.state.name == "ACTIVE" ){
+                issueCredientialToConnection(connection)
+            }
+        }
     }
 
     fun issueCredientialToConnections() {
@@ -122,12 +131,12 @@ class GovController(_name: String, _url: String) : Controller(_name, _url) {
             ariesClient.issueCredentialV2Send(
                 V1CredentialProposalRequest
                     .builder()
-                    .issuerDid(issuerDid)
+                    .issuerDid(getIssuerDid())
                     .connectionId(connection.connectionId.toString())
-                    .credentialDefinitionId(citizenCredDefId)
-                    .schemaName(citizenSchemaId.split(":")[2])
-                    .schemaIssuerDid(issuerDid)
-                    .schemaVersion(citizenSchemaId.split(":")[3])
+                    .credentialDefinitionId(getCredentialDefinition())
+                    .schemaName(getSchemaId().split(":")[2])
+                    .schemaIssuerDid(getIssuerDid())
+                    .schemaVersion(getSchemaId().split(":")[3])
                     .credentialProposal(
                         CredentialPreview(
                             CredentialAttributes.from(CitizenCred(20, connection.theirLabel))

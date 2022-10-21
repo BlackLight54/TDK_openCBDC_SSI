@@ -5,6 +5,7 @@ import org.hyperledger.acy_py.generated.model.V20CredStoreRequest
 import org.hyperledger.aries.api.connection.ConnectionReceiveInvitationFilter
 import org.hyperledger.aries.api.connection.ReceiveInvitationRequest
 import org.hyperledger.aries.api.issue_credential_v2.V2IssueCredentialRecordsFilter
+import org.hyperledger.aries.api.issue_credential_v2.V2IssueIndyCredentialEvent
 
 class CitizenController(_name : String, _url : String): Controller(_name, _url) {
 
@@ -42,4 +43,5 @@ class CitizenController(_name : String, _url : String): Controller(_name, _url) 
             log.info("No credential record to store")
         }
     }
+
 }
