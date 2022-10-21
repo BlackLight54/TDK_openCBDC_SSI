@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import javax.annotation.PostConstruct
+import kotlin.random.Random
+import kotlin.random.nextUInt
 
 @RestController
 class Endpoints(
@@ -32,6 +34,7 @@ class Endpoints(
     fun auditableTx(): String {
         aliceController.establishConnection(sentinelController)
         bobController.establishConnection(sentinelController)
+        aliceController.sendBasicMessage("cbdc:${aliceController.name}_addr:${bobController.name}_addr:100:${Random.nextUInt()}", sentinelController.name)
         return ""
     }
     @GetMapping("/privateTx")

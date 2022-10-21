@@ -14,23 +14,9 @@ import org.hyperledger.aries.pojo.PojoProcessor
 
 class GovController(_name: String, _url: String) : Controller(_name, _url) {
 
-
-
-    fun prepareForCredientialIssuance() {
-        getIssuerDid()
-        getSchemaId()
-        getCredentialDefinition()
-    }
-
-    private fun getIssuerDid() : String {
-        val issuerDid = ariesClient.walletDidPublic().get().did
-        log.info("Got issuer DID: $issuerDid")
-        return issuerDid
-    }
-
     private fun getSchemaId() : String {
         val schemaName = "citizen"
-        val schemaVersion = "1.12"
+        val schemaVersion = "1.14"
         log.info("Getting schema Id")
         val definedSchemas = ariesClient.schemasCreated(
             SchemasCreatedFilter
@@ -131,11 +117,11 @@ class GovController(_name: String, _url: String) : Controller(_name, _url) {
             ariesClient.issueCredentialV2Send(
                 V1CredentialProposalRequest
                     .builder()
-                    .issuerDid(getIssuerDid())
+                    .issuerDid(getPublicDID())
                     .connectionId(connection.connectionId.toString())
                     .credentialDefinitionId(getCredentialDefinition())
                     .schemaName(getSchemaId().split(":")[2])
-                    .schemaIssuerDid(getIssuerDid())
+                    .schemaIssuerDid(getPublicDID())
                     .schemaVersion(getSchemaId().split(":")[3])
                     .credentialProposal(
                         CredentialPreview(

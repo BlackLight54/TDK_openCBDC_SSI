@@ -26,6 +26,8 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
     lateinit var govController : GovController
 
 
+    val addressesToNames = mutableMapOf<String, String>()
+
     private fun requestProof(connection: ConnectionRecord, credentialDefinitionId: String){
         log.info("Requesting proof from: ${connection.theirLabel}")
         val proofRequest = PresentProofRequestHelper.buildForAllAttributes(
@@ -60,16 +62,9 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
         }
     }
 
-
-    fun getIssuerDid() : String{
-        val issuerDID = ariesClient.walletDidPublic().get().did
-        log.info("Got issuer DID: $issuerDID")
-        return issuerDID
-    }
-
-    private fun getSchemaId() : String{
+    fun getSchemaId() : String{
         val schemaName = "CBCard"
-        val schemaVersion = "1.6"
+        val schemaVersion = "1.8"
         val schemaId : String
         log.info("Getting CB schema Id")
         val definedSchemas = ariesClient.schemasCreated(
@@ -97,7 +92,7 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
         log.info("Schema id: $schemaId")
         return schemaId
     }
-    private fun getCredentialDefinition() :String {
+    fun getCredentialDefinition() :String {
         log.info("Getting credential definition")
         val citizenCredDefWalletResp = ariesClient.credentialDefinitionsCreated(
             CredentialDefinitionFilter
@@ -143,24 +138,26 @@ class CBController(_name :String , _url : String) : Controller(_name,_url) {
 
     private fun issueCredientialToConnection(connection: ConnectionRecord?) {
         if (connection != null) {
+            val address = connection.theirLabel + "_addr"
             log.info("Issuing credential to connection ${connection.connectionId}: ${connection.theirLabel}")
             ariesClient.issueCredentialV2Send(
                 V1CredentialProposalRequest
                     .builder()
-                    .issuerDid(getIssuerDid())
+                    .issuerDid(getPublicDID())
                     .connectionId(connection.connectionId.toString())
                     .credentialDefinitionId(getCredentialDefinition())
                     .schemaName(getSchemaId().split(":")[2])
-                    .schemaIssuerDid(getIssuerDid())
+                    .schemaIssuerDid(getPublicDID())
                     .schemaVersion(getSchemaId().split(":")[3])
                     .credentialProposal(
                         CredentialPreview(
-                            CredentialAttributes.from(CBCred(connection.theirLabel,connection.theirLabel + "::addr"))
+                            CredentialAttributes.from(CBCred(connection.theirLabel,address))
                         )
                     )
                     .build()
             )
-            log.info("Credential Issued")
+            log.info("Credential Issued to ${connection.theirLabel}: $address")
+            addressesToNames[address] = connection.theirLabel
         }
     }
     // Currently CB initiates the issuance of address VCs

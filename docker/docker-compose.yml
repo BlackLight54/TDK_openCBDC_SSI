@@ -104,9 +104,10 @@ services:
     restart: always
 
   agent-sentinel:
-    build: 
-      context: ../
-      dockerfile: ./docker/sentinel.Dockerfile
+    # build: 
+    #   context: ../
+    #   dockerfile: ./docker/sentinel.Dockerfile
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5-rc0
     container_name: agent-sentinel
     environment:
       ACAPY_WALLET_SEED: Sentinel000000000000000000000111

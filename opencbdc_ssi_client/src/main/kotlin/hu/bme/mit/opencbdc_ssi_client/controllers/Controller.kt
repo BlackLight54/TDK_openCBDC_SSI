@@ -50,5 +50,8 @@ abstract class Controller(val name: String, val url: String) : EventHandler1() {
             .findFirst().get()
     }
 
+    fun getPublicDID(): String {
+        return ariesClient.walletDidPublic().get().did
+    }
 
 }
