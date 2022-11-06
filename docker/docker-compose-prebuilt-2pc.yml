@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+
+  sentinel0:
+    image: ghcr.io/mit-dci/opencbdc-tx:sha-cb0e78d
+
+  coordinator0:
+    image: ghcr.io/mit-dci/opencbdc-tx:sha-cb0e78d
+
+  shard0:
+    image: ghcr.io/mit-dci/opencbdc-tx:sha-cb0e78d
