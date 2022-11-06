@@ -10,14 +10,16 @@ import org.hyperledger.aries.api.issue_credential_v1.V1CredentialProposalRequest
 import org.hyperledger.aries.api.schema.SchemaSendRequest
 import org.hyperledger.aries.api.schema.SchemasCreatedFilter
 import org.hyperledger.aries.pojo.PojoProcessor
+import kotlin.random.Random
+import kotlin.random.nextUInt
 
 
 class GovController(_name: String, _url: String) : Controller(_name, _url) {
+        private val schemaName = "citizen"
+        private val schemaVersion = "1." + Random.nextUInt(1000u).toString()
 
     private fun getSchemaId() : String {
-        val schemaName = "citizen"
-        val schemaVersion = "1.14"
-        log.info("Getting schema Id")
+        log.debug("Getting schema Id")
         val definedSchemas = ariesClient.schemasCreated(
             SchemasCreatedFilter
                 .builder()
@@ -27,7 +29,7 @@ class GovController(_name: String, _url: String) : Controller(_name, _url) {
         ).get()
         val schemaId : String
         if (definedSchemas.isEmpty()) {
-            log.info("Schema doesn't exist in wallet -> posting Schema")
+            log.info("Schema doesn't exist in wallet -> posting Schema $schemaName:$schemaVersion")
             schemaId = ariesClient.schemas(
                 SchemaSendRequest
                     .builder()
@@ -38,11 +40,12 @@ class GovController(_name: String, _url: String) : Controller(_name, _url) {
                     )
                     .build()
             ).get().schemaId
+            log.info("schemaId: $schemaId")
         } else{
-            log.info("Schema already defined")
+            log.debug("Schema already defined")
             schemaId = definedSchemas.first()
         }
-        log.info("Schema id: $schemaId")
+        log.debug("Schema id: $schemaId")
         return schemaId
     }
 

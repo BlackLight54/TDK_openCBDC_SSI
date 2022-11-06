@@ -34,8 +34,12 @@ class Endpoints(
     fun auditableTx(): String {
         aliceController.establishConnection(sentinelController)
         bobController.establishConnection(sentinelController)
-        aliceController.sendBasicMessage("cbdc:${aliceController.name}_addr:${bobController.name}_addr:100:${Random.nextUInt()}", sentinelController.name)
+        aliceController.sendBasicMessage("cbdc${aliceController.name}:${bobController.name}:${cbController.namesToAddresses["alice"]}:${cbController.namesToAddresses["bob"]}:100:${Random.nextUInt()}", sentinelController.name)
         return ""
+    }
+    @GetMapping("/createAddress")
+    fun createaddr(){
+        cbController.createAddress("alice")
     }
     @GetMapping("/privateTx")
     fun privateTx(): String {

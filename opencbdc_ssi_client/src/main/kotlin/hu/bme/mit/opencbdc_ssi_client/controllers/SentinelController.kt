@@ -10,6 +10,7 @@ import org.hyperledger.aries.api.present_proof.PresentationExchangeState
 import org.hyperledger.aries.api.present_proof_v2.V20PresExRecord
 import org.hyperledger.aries.api.present_proof_v2.V20PresSendRequestRequest
 import org.springframework.beans.factory.annotation.Autowired
+import java.io.File
 
 
 class SentinelController(_name: String, _url: String) : Controller(_name, _url) {
@@ -21,17 +22,19 @@ class SentinelController(_name: String, _url: String) : Controller(_name, _url) 
 
     enum class TxStatus { PENDING, ACCEPTED, REJECTED }
     class TxRecord(
-        val from_address: String, val to_address: String, val amount: Int, val nonce: String, var status: TxStatus
+        val from_name: String , val to_name: String , val from_address: String, val to_address: String, val amount: Int, val nonce: String, var status: TxStatus
     ) {
         override fun toString(): String {
-            return "cbdc:$from_address:$to_address:$amount:$nonce"
+            return "cbdc:$from_name:$to_name:$from_address:$to_address:$amount:$nonce"
         }
 
         constructor(txData: String) : this(
             txData.split(":")[1],
             txData.split(":")[2],
-            txData.split(":")[3].toInt(),
+            txData.split(":")[3],
             txData.split(":")[4],
+            txData.split(":")[5].toInt(),
+            txData.split(":")[6],
             TxStatus.PENDING
         )
     }
@@ -58,23 +61,24 @@ class SentinelController(_name: String, _url: String) : Controller(_name, _url) 
         if (txRecords.any { tx ->
                 tx.nonce == txRecord.nonce && tx.from_address == txRecord.from_address && tx.to_address == txRecord.to_address && tx.amount == txRecord.amount
             }) {
-            log.info("Transaction already exists")
+            log.error("Transaction already exists")
             return
         }
+
         txRecords.add(txRecord)
-        log.info("Transaction added to the txRecords")
-        log.info("Fecting name from CB")
-        val fromName = cbController.addressesToNames[txRecord.from_address]
-        val toName = cbController.addressesToNames[txRecord.to_address]
+        log.debug("Transaction added to the txRecords")
+
+
+        val fromName = txRecord.from_name
+        val toName = txRecord.to_name
         log.info("$fromName -> $toName")
-        if (fromName == null && toName == null) {
-            log.info("Neither sender nor receiver is registered in the CB")
-            return
-        }
-        val fromConnection = ariesClient.connections().get().filter { conn -> conn.theirLabel == fromName }.first()
-        val toConnection = ariesClient.connections().get().filter { conn -> conn.theirLabel == toName }.first()
+
+        log.debug("Getting connection record for $fromName, $toName")
+        val fromConnection = ariesClient.connections().get().first { conn -> conn.theirLabel == fromName }
+        val toConnection = ariesClient.connections().get().first { conn -> conn.theirLabel == toName }
         if (fromConnection == null || toConnection == null) {
-            log.info("Either sender or receiver is not connected to the Sentinel")
+            log.error("Either sender or receiver is not connected to the Sentinel")
+            txRecord.status = TxStatus.REJECTED
             return
         }
 
@@ -106,10 +110,35 @@ class SentinelController(_name: String, _url: String) : Controller(_name, _url) 
 
     }
 
-    fun openCBDCTransact(from_address: String, to_addresss: String, amount: Int) {
+    fun openCBDCTransact(from_name:String ,to_name: String,  from_address: String, to_addresss: String, amount: Int): String? {
         // put into the same docker network(SSI_client -> host?)
         // call through ssh
-        log.info("opencbdc transaction : $from_address -> $to_addresss : $amount")
+        log.info("opencbdc transaction :$from_name-$from_address -> $to_name-$to_addresss : $amount")
+
+        val builder = ProcessBuilder();
+
+        builder.command(
+            "docker",
+            "exec",
+            "-i",
+            "opencbdc-tx-client",
+            "./build/src/uhs/client/client-cli",
+            "2pc-compose.cfg",
+            "${from_name}Mempool.dat",
+            "${from_name}Wallet.dat",
+            "send",
+            to_addresss,
+            amount.toString()
+        )
+//          builder.command("cmd.exe", "/c", "dir")
+        builder.directory(File(System.getProperty("user.home")));
+        val process = builder.start();
+        val exitCode = process.waitFor();
+        assert(exitCode == 0);
+        val returnString = process.inputStream.readAllBytes().toString(Charsets.UTF_8)
+        val importinput_data = returnString.split("\n")[3]
+        log.info("importinput_data: $importinput_data")
+        return importinput_data
     }
 
     override fun handleProofV2(proof: V20PresExRecord?) {
@@ -124,12 +153,13 @@ class SentinelController(_name: String, _url: String) : Controller(_name, _url) 
                 // Only accept if transaction is pending
                 if (txRecord != null && txRecord.status == TxStatus.PENDING) {
 
-                    // TODO : check if addresses match
+                    // TODO : check if addresses in VP and transaction record match match
                     if (true) {
                         txRecord.status = TxStatus.ACCEPTED
                         log.info("Transaction accepted: ${txRecord.from_address} -> ${txRecord.to_address} : ${txRecord.amount}")
                         log.info("${proof.pres.presentationsTildeAttach}")
-                        openCBDCTransact(txRecord.from_address, txRecord.to_address, txRecord.amount)
+                        val importinput_data = openCBDCTransact(txRecord.from_name, txRecord.to_name, txRecord.from_address, txRecord.to_address, txRecord.amount)
+
                     }
                 }
 
