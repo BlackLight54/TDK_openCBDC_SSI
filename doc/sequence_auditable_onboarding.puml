@@ -1,0 +1,91 @@
+@startuml seq auditable onboarding
+'based on partly https://github.com/hyperledger/aries-cloudagent-python/blob/main/demo/AriesOpenAPIDemo.md
+actor Alice as A 
+participant "Central Bank" as CB 
+database "Identity Provider" as SSI
+Title Connection
+'group estabilish connection
+'CB -> CB : create connection invitation 
+'activate CB
+CB -> A : Connection invitation JSON
+'deactivate CB  
+'A -> A : Recieve invitation
+A -> A : Accept invitation
+A -> CB : connection request 
+CB -> CB : Accept connection request
+'hnote over A, CB : Connection status can be checked at this point
+'end  
+newpage
+hnote over CB 
+There are preparations for crediential issuance, specifically:
+----
+- register a public DID and stored it on the ledger;
+- create a schema and register it on the ledger;
+- create a credential definition and register it on the ledger.
+----
+During initalization we may check if the schema and credential definitions on the ledger.
+end note
+newpage Onboarding with KYC
+
+A -> CB: Open account
+activate CB
+alt Alice already has KYC credential
+CB -> A : Request presentation of KYC credential
+activate A
+return VP
+CB -> SSI: Verify VP 
+activate SSI
+return  
+else 
+CB -> CB : Perform KYC
+activate CB 
+loop for all required credentials
+CB -> A : Request presentation of credential
+activate A
+return VP 
+CB -> SSI: Verify VP
+activate SSI
+return 
+end
+opt KYC successful
+CB -> A : Issue KYC VC
+end 
+end
+return 
+return ok/err
+
+
+newpage Issuing a credential
+'group crediential issuance [ KYC check passed]
+'CB -> CB : get Cred def
+'activate CB
+'CB -> CB : create credential offer
+CB -> A : Cred offer
+'deactivate CB
+deactivate CB
+activate A
+
+A -> SSI : Get cred def
+activate SSI
+SSI -> A : Cred def
+deactivate SSI
+'A -> A : create cred reqest
+A -> CB : cred request
+activate CB 
+'CB -> CB : Issue crediential
+CB -> SSI : publish crediential to revocation registry
+activate SSI
+SSI -> CB 
+deactivate SSI
+CB -> A : issue crediential
+deactivate CB
+A -> SSI : Get crediantial revocation registry definition 
+activate SSI 
+SSI -> A : Revocation registry definition
+deactivate SSI
+A -> A : Store crediential in wallet
+'A -> A : Store cred id
+deactivate A
+'end 
+
+@enduml

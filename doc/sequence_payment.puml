@@ -12,7 +12,7 @@ entity "Sentinel Guard" as SG
 entity "Sentinel" as S
 entity "openCBDC TxP" as TxP
 
-rnote over all
+hnote across
     Which keys/identifiers do we use for what?
     DID, DIDDoc -> identify the clients among eachother
     CB issued VC -> identify the clients to the CB

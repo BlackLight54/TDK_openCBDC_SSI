@@ -1,0 +1,90 @@
+@startuml seq auditable payment
+title Auditable payment workflow 
+
+skinparam MaxMessageSize 100
+
+database "SSI ledger" as SSI
+actor "Alice" as A
+actor "Bob" as B
+'entity "Central Bank" as CB
+'entity "Government" as G
+entity "Sentinel Guard" as SG
+entity "Sentinel" as S
+' entity "openCBDC TxP" as TxP
+
+hnote over SG, S
+    Controlled by the CB, secure
+end note 
+hnote over A, B
+    Onboarded with the CB 
+    and received their VC
+end note 
+
+A -> B ++ : Request address
+return VP
+
+A -> B ++: Get public DID 
+return public DID 
+
+
+
+
+
+A -> A: Create valid openCBDC Tx
+' note left :see Tx class uml
+
+autoactivate on 
+' note left
+' KYC check
+' --OR--
+' DigiCash-like 
+' No smurfing
+' Speed of money check
+' end note 
+' alt KYC check
+A -> SG: Tx request (openCBDC Tx, Alice public DID, Bob public DID)
+SG -> SSI ++: resolve DIDs 
+return DIDDocs
+note right: DIDDoc contains endpoint to reach Bob
+group identity check 
+SG -> A : Request identity proof
+return identity proof
+SG -> B : Request identity proof
+return identity proof
+' end 
+end 
+opt Identity check passed 
+SG -> S: openCBDC TX
+return Tx result, importinput
+end 
+return err/ok, Tx result, importinput
+activate A 
+A -> B --: Tx result, importinput
+B -> B -- : import inputs to wallet 
+' newpage openCBDC transaction
+' opt tx valid 
+'     SG -> S : send in tx to payment processor
+'     S -> S : Transaction local validation 
+'     deactivate S
+'     note left 
+'     Which keys do we
+'     use as encumberance?
+'     ---
+'     The ones in the DIDDoc
+'     end note 
+'     S -> TxP : process Tx
+'     return Tx processed
+'     return Tx result
+' end 
+' opt tx success 
+' alt Auditable
+' autoactivate off
+' SG -> B:  transaction result
+' ' else DigiCash-like
+' ' SG -> B: Transaction result, sig{{from_address,amount},timestamp}, sig{{to_address, amount},timestamp}
+' ' B -> A : sig{{from_address, amount}, timestamp}
+' ' A -> SG : req hash update(proof,hash)
+' ' B -> SG : req hash update(proof,hash)
+' end
+' end
+@enduml

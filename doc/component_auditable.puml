@@ -1,0 +1,45 @@
+@startuml
+frame Controllers{
+[Central Bank] as CB #YellowGreen
+[Sentinel Guard] as SG #YellowGreen
+[Citizen] as C #YellowGreen
+[Experiment Orchestrator] as O #YellowGreen
+O --> CB
+O --> SG
+O --> C
+}
+node "Aries network"{
+[Central Bank Agent] as CBA 
+[Sentinel Guard Agent] as SGA
+[Citizen Agent] as CA
+CA -- CBA
+CA -- SGA
+
+CBA -- CBAopenAPI
+SGA -- SGAopenAPI
+CA -- CAopenAPI
+}
+cloud {
+    ["Identity Provider"] as IP
+
+}
+node "openCBDC newtork" {
+[Sentinel] as S
+[Shard] as Sh
+[Transacton coordinator] as TC
+}
+
+C <---> CAopenAPI
+CB <---> CBAopenAPI
+SG <---> SGAopenAPI
+
+CBA -> IP
+CA -> IP
+SGA -> IP
+
+SG ------> S
+
+Sh <--> TC
+TC <--> S
+
+@enduml

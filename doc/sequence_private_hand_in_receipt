@@ -1,0 +1,8 @@
+@startuml
+@startuml 
+title  "Aquiring send- and recieve tokens" 
+actor  Citizen as A
+participant  "Central Bank"  as CB
+
+hnote over A : Recieved a receipt from the sentinel
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+actor Alice as A
+actor Bob as B
+participant "Extended Sentinel" as S
+
+hnote over S
+Has access to: 
+- CB's public key 
+- corresponding usable_until
+- corresponding max_amount
+end note
+
+hnote over A,B 
+Each have their own private key: citizen_private_key
+end note 
+hnote over A : has spend token:\nsigned(from_address|sentinelID)
+hnote over B : has recieve token:\nsigned(to_address|sentinelID)
+A -> B ++: transactionProposal:\n transaction_amount,\n transaction_key
+B -> A --: transactionProposalResponse:\n transaction_amount,\n transaction_key,\n to_address
+
+
+A -> S ++: registerToken:\n signed(\n  transaction_key, \n  signed(from_address|sentinelID),\n  transaction_amount)
+
+alt citizen signature is valid \n&& CB signature is valid \n&& CB signature is not revoked \n&& transaction_amount < max_amount \n&& sentinelID == {this sentinel's id} \n&& token is not registered \n&& token is not spent
+S -> S  : registerToken:\n signed(\n  transaction_key, \n  signed(from_address|sentinelID),\n  transaction_amount)
+else 
+S --> A --:error
+end 
+alt citizen signature is valid \n&& CB signature is valid \n&& CB signature is not revoked \n&& transaction_amount < max_amount \n&& sentinelID == {this sentinel's id}  \n&& token is not registered \n&& token is not spent
+B -> S ++: registerToken:\n signed(\n  transaction_key, \n  signed(to_address|sentinelID),\n  transaction_amount)
+S -> S  : registerToken:\n signed(\n  transaction_key, \n  signed(to_address|sentinelID),\n  transaction_amount)
+else 
+S -->B -- : error
+end
+
+A -> A : create full openCBDC transaction:\n from_address, \n to_address, \n transaction_amount
+A -> S ++: sendTransaction: full openCBDC transaction(\n from_address, \n to_address, \n transaction_amount)
+rnote right : opencbdc transactions are signed by the \ncitizen's private key
+S -> S : mark tokend as spent
+S --> A -- : transactionResponse: ok / error 
+
+A -> S ++: request recepit: signed(transaction_key)
+return receipt: signed(from\_address|transaction\_amount|timestamp) / error
+B -> S ++: request recepit: signed(transaction_key)
+return receipt: signed(from\_address|transaction\_amount|timestamp) / error
+@enduml

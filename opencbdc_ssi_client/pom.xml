@@ -67,6 +67,11 @@
             <artifactId>aries-client-python</artifactId>
             <version>0.7.30</version>
         </dependency>
+        <!-- <dependency>
+            <groupId>hu.bme.mit</groupId>
+            <artifactId>opencbdc_ssi_client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency> -->
     </dependencies>
 
     <build>

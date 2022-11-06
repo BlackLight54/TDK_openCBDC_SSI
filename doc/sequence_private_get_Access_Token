@@ -1,0 +1,27 @@
+@startuml 
+title  "Aquiring send- and recieve tokens" 
+actor  Citizen as A
+participant  "Central Bank"  as CB
+
+A -> CB ++ : request token(//encrypted(address|sentinelId, tokentype)//) 
+
+CB -> A ++: request identity proof: credential_defintion
+A -> CB --: identity proof: Verifiable presentation 
+
+opt tokentype == "send"
+opt cooldown time has passed since last token use \n && citizen has no pending tokens
+CB -> CB : sign encrypted(address|sentinelId)
+end
+ 
+else tokentype = "recieve"
+    A -> CB: ZKP Proof(current_balance + max_amount < policy_holding_limit)
+opt cooldown time has passed since last token use \n && citizen has no pending tokens \n && proof present
+CB -> CB : sign encrypted(address|sentinelId)
+end
+end
+return //signed(encrypted(address|sentinelId|token))///err
+opt token recieved
+activate A
+A -> A --: decrypt //signed(encrypted(address|sentinelId|token))//
+end 
+@enduml
